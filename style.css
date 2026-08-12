@@ -41,6 +41,131 @@ html[data-theme="dark"] {
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; overflow-x: hidden; max-width: 100%; scroll-padding-top: var(--header-h); }
 body { overflow-x: hidden; max-width: 100%; }
+
+/* ---------- welcome splash: cinematic curtain reveal ---------- */
+body.splash-lock { overflow: hidden; height: 100vh; }
+
+#splash {
+  position: fixed; inset: 0; z-index: 9999;
+  pointer-events: none; /* never blocks input; panels/content re-enable visually only */
+}
+#splash.splash-hidden { display: none; }
+
+/* two-panel curtain, black with a faint gold vignette seam at center */
+.splash-panel {
+  position: fixed; top: 0; bottom: 0; width: 50.4%;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(201,162,75,.10), transparent 60%),
+    var(--black);
+  background-blend-mode: normal;
+  transition: transform 1.05s cubic-bezier(.76,0,.24,1);
+  will-change: transform;
+}
+.splash-panel-l { left: 0; border-inline-end: 1px solid rgba(201,162,75,.18); }
+.splash-panel-r { right: 0; border-inline-start: 1px solid rgba(201,162,75,.18); }
+#splash.splash-out .splash-panel-l { transform: translateX(-101%); }
+#splash.splash-out .splash-panel-r { transform: translateX(101%); }
+
+/* rising ember particles, drifting up through the curtain like incense smoke */
+.splash-particles { position: fixed; inset: 0; overflow: hidden; }
+.splash-particles span {
+  position: absolute; bottom: -4vh; left: var(--x, 50%);
+  width: var(--s, 3px); height: var(--s, 3px); border-radius: 50%;
+  background: radial-gradient(circle, #fff6df, var(--gold-light) 55%, transparent 78%);
+  opacity: 0; filter: blur(.2px);
+  animation: splashEmber var(--d, 6s) ease-in var(--delay, 0s) infinite;
+}
+@keyframes splashEmber {
+  0%   { transform: translate(0, 0) scale(1); opacity: 0; }
+  12%  { opacity: .85; }
+  75%  { opacity: .4; }
+  100% { transform: translate(var(--drift, 12px), -92vh) scale(.4); opacity: 0; }
+}
+
+/* centered emblem group — fades/scales independently of the curtain panels */
+.splash-content {
+  position: fixed; inset: 0; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .85rem;
+  transition: opacity .8s ease, filter .8s ease, transform .8s ease;
+}
+#splash.splash-out .splash-content {
+  opacity: 0; filter: blur(10px); transform: scale(1.08);
+  transition: opacity .7s ease, filter .7s ease, transform .8s ease;
+}
+
+.splash-glow {
+  position: absolute; width: 240px; height: 240px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(230,200,125,.28), transparent 70%);
+  filter: blur(6px); animation: splashGlowPulse 3.2s ease-in-out infinite;
+}
+@keyframes splashGlowPulse {
+  0%, 100% { opacity: .55; transform: scale(.92); }
+  50%      { opacity: .95; transform: scale(1.06); }
+}
+
+.splash-ring {
+  position: absolute; border-radius: 50%; border: 1px solid rgba(201,162,75,.5);
+}
+.splash-ring-1 { width: 118px; height: 118px; animation: splashRingPulse 2.6s ease-out infinite; }
+.splash-ring-2 {
+  width: 168px; height: 168px; border-style: dashed; border-color: rgba(201,162,75,.28);
+  animation: splashRingSpin 22s linear infinite;
+}
+@keyframes splashRingPulse {
+  0%   { transform: scale(.75); opacity: 0; }
+  35%  { opacity: .65; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+@keyframes splashRingSpin { to { transform: rotate(360deg); } }
+
+#splashLogo {
+  position: relative; width: 74px; height: 74px; object-fit: contain;
+  opacity: 0; transform: scale(.55) rotate(-4deg);
+  filter: drop-shadow(0 0 22px rgba(230,200,125,.5)) blur(6px);
+  animation: splashLogoIn 1.15s cubic-bezier(.16,.85,.24,1) forwards .2s;
+}
+@keyframes splashLogoIn {
+  0%   { opacity: 0; transform: scale(.55) rotate(-4deg); filter: drop-shadow(0 0 22px rgba(230,200,125,.5)) blur(6px); }
+  55%  { opacity: 1; filter: drop-shadow(0 0 22px rgba(230,200,125,.5)) blur(0); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 14px rgba(230,200,125,.4)) blur(0); }
+}
+
+.splash-line {
+  position: relative; display: block; width: 46px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
+  transform: scaleX(0); animation: splashLineIn .7s ease forwards .95s;
+}
+@keyframes splashLineIn { to { transform: scaleX(1); } }
+
+.splash-word {
+  position: relative; display: inline-flex; font-family: "Cormorant Garamond", serif;
+  font-weight: 700; font-size: 1.3rem; color: var(--gold-light);
+}
+.splash-word span {
+  display: inline-block; opacity: 0; letter-spacing: .1em;
+  transform: translateY(10px);
+  animation: splashLetterIn .6s cubic-bezier(.2,.8,.2,1) forwards;
+  animation-delay: calc(1.05s + var(--i) * .09s);
+}
+@keyframes splashLetterIn { to { opacity: 1; transform: translateY(0); } }
+
+.splash-sub {
+  font-family: "Amiri", "Cormorant Garamond", serif; font-size: .8rem; letter-spacing: .04em;
+  color: var(--gold-dim); opacity: 0;
+  animation: splashWordIn .7s ease forwards 1.4s;
+}
+html[lang="fr"] .splash-sub, html[lang="en"] .splash-sub { font-family: "Jost", sans-serif; letter-spacing: .18em; text-transform: uppercase; font-size: .7rem; }
+@keyframes splashWordIn { to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  #splash, .splash-panel, .splash-content, #splashLogo, .splash-word span, .splash-line, .splash-sub,
+  .splash-ring, .splash-glow, .splash-particles span {
+    animation: none !important; transition: opacity .25s ease !important;
+  }
+  #splashLogo, .splash-word span, .splash-line, .splash-sub { opacity: 1 !important; transform: none !important; filter: none !important; }
+  #splash.splash-out .splash-panel-l, #splash.splash-out .splash-panel-r { transform: none; }
+  #splash.splash-out { opacity: 0; }
+}
 body, .light, .darksec, #orderForm, #contactForm, .use-card, .box-block,
 .totals, .ty-card, .price-tag, .field input, .field select, .field textarea {
   transition: background-color .25s ease, color .25s ease, border-color .25s ease;
@@ -568,6 +693,16 @@ section { padding: 3.5rem 0; }
 .bogo-badge svg { width: 16px; height: 16px; flex-shrink: 0; }
 .bogo-hint-form {
   margin-top: .35rem; font-size: .8rem; color: var(--gold-dim); font-weight: 700;
+}
+.free-delivery-hint {
+  margin-bottom: .8rem; padding: .55rem .9rem; border-radius: 10px;
+  font-size: .85rem; font-weight: 700; text-align: center;
+  background: rgba(201,162,75,.1); border: 1px dashed var(--gold-dim); color: var(--gold-strong);
+}
+.free-delivery-hint.active {
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  color: var(--black); border-style: solid; border-color: transparent;
+  animation: pulseGlow 2.6s ease-in-out infinite;
 }
 .stock-note { color: var(--err); font-weight: 700; margin-bottom: 1rem; }
 .box-block { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem 1.2rem; margin-bottom: 1.4rem; }

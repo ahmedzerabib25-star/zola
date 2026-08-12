@@ -38,7 +38,7 @@ const I18N = {
   },
 };
 
-let LOCALE = localStorage.getItem("zola_admin_locale") || "fr";
+let LOCALE = localStorage.getItem("zola_admin_locale") || "ar";
 
 function applyLocale() {
   document.documentElement.lang = LOCALE;

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -80,6 +80,23 @@
 
     <!-- Delivery -->
     <section id="tab-delivery" class="panel" hidden>
+      <div class="card">
+        <h3 data-i18n="free_delivery_title"></h3>
+        <p class="hint" data-i18n="free_delivery_hint"></p>
+        <label class="switch-row">
+          <span class="switch"><input type="checkbox" id="freeDeliveryAll"><span class="switch-track"></span></span>
+          <span data-i18n="free_delivery_all_label"></span>
+        </label>
+        <div class="card-grid cols-2" style="margin-top:.9rem">
+          <div class="field">
+            <label data-i18n="free_delivery_threshold_label"></label>
+            <input id="freeDeliveryThreshold" type="number" min="0" step="100" dir="ltr">
+          </div>
+        </div>
+        <button id="freeDeliverySave" class="btn-gold btn-sm" data-i18n="save"></button>
+        <span id="freeDeliveryStatus" class="save-status"></span>
+      </div>
+
       <p class="hint" data-i18n="delivery_hint"></p>
       <div class="toolbar">
         <button id="feesSaveAll" class="btn-gold" data-i18n="save_all"></button>

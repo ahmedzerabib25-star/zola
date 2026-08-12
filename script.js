@@ -8,7 +8,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ---------- state ----------
-let LOCALE = localStorage.getItem("zola_locale") || "fr";
+let LOCALE = localStorage.getItem("zola_locale") || "ar";
 let CONTENT = {};          // key -> {ar,fr,en} | {url}
 let PRODUCT = null;        // active product row
 let WILAYAS = [];          // [{wilaya_id, wilaya_name_latin, wilaya_name_arabic}]
@@ -27,7 +27,7 @@ const t = (key) => (CONTENT[key] && (CONTENT[key][LOCALE] || CONTENT[key].ar)) |
 const SUN_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8l1.8-1.8M18 6l1.8-1.8"/></svg>';
 const MOON_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 14.7A8.5 8.5 0 1 1 9.3 3.5a7 7 0 0 0 11.2 11.2Z"/></svg>';
 
-let THEME = localStorage.getItem("zola_theme") || "light";
+let THEME = localStorage.getItem("zola_theme") || "dark";
 function applyTheme() {
   document.documentElement.dataset.theme = THEME;
   localStorage.setItem("zola_theme", THEME);
@@ -39,6 +39,39 @@ $("themeToggle").addEventListener("click", () => {
   THEME = THEME === "dark" ? "light" : "dark";
   applyTheme();
 });
+
+// ---------- welcome splash ----------
+// Plays on every visit (no localStorage skip) — a short cinematic brand moment, not a gate.
+(function initSplash() {
+  const splash = $("splash");
+  if (!splash) return;
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const SPLASH_SUB = { ar: "لبان ظفار الأصيل", fr: "Encens de Dhofar", en: "Frankincense of Dhofar" };
+  const subEl = $("splashSub");
+  if (subEl) subEl.textContent = SPLASH_SUB[LOCALE] || SPLASH_SUB.ar;
+
+  if (!reduced) {
+    const field = $("splashParticles");
+    const N = 16;
+    for (let i = 0; i < N; i++) {
+      const p = document.createElement("span");
+      p.style.setProperty("--x", (6 + Math.random() * 88) + "%");
+      p.style.setProperty("--s", (2 + Math.random() * 3).toFixed(1) + "px");
+      p.style.setProperty("--d", (4.5 + Math.random() * 4).toFixed(2) + "s");
+      p.style.setProperty("--delay", (Math.random() * 3).toFixed(2) + "s");
+      p.style.setProperty("--drift", (Math.random() * 40 - 20).toFixed(0) + "px");
+      field.appendChild(p);
+    }
+  }
+
+  const dismiss = () => {
+    splash.classList.add("splash-out");
+    document.body.classList.remove("splash-lock");
+    setTimeout(() => splash.classList.add("splash-hidden"), reduced ? 260 : 1100);
+  };
+  setTimeout(dismiss, reduced ? 300 : 2150);
+})();
 
 // ---------- hero headline stagger ----------
 function wrapHeroWords() {
@@ -460,11 +493,39 @@ async function renderCommunes() {
 }
 
 // ---------- live total ----------
-function currentFee() {
+function freeDeliveryThreshold() {
+  return Number(SETTINGS.free_delivery_threshold && SETTINGS.free_delivery_threshold.amount) || 0;
+}
+function freeDeliveryAll() {
+  return !!(SETTINGS.free_delivery_all && SETTINGS.free_delivery_all.enabled);
+}
+
+function currentFee(sub) {
   const wid = $("fWilaya").value;
   if (!wid || !FEES[wid]) return null;
   const type = document.querySelector('input[name="dtype"]:checked').value;
-  return type === "home" ? FEES[wid].home_fee : FEES[wid].desk_fee;
+  const nominal = type === "home" ? FEES[wid].home_fee : FEES[wid].desk_fee;
+  const threshold = freeDeliveryThreshold();
+  if (freeDeliveryAll() || (threshold > 0 && sub >= threshold)) return 0;
+  return nominal;
+}
+
+function renderFreeDeliveryHint(sub, fee, nominalFee) {
+  const el = $("freeDeliveryHint");
+  if (!el) return;
+  const threshold = freeDeliveryThreshold();
+  if (freeDeliveryAll() || (fee === 0 && nominalFee > 0)) {
+    el.hidden = false;
+    el.textContent = t("free_delivery_badge");
+    el.className = "free-delivery-hint active";
+  } else if (threshold > 0 && sub < threshold) {
+    el.hidden = false;
+    el.textContent = t("free_delivery_threshold_hint")
+      .replace("{amount}", fmt(threshold)).replace("{currency}", t("ui_currency"));
+    el.className = "free-delivery-hint";
+  } else {
+    el.hidden = true;
+  }
 }
 
 function updateTotals() {
@@ -472,11 +533,15 @@ function updateTotals() {
   const qty = clampQty();
   renderPricing(qty); // keep the price tag / discount badge / tier hint in sync with quantity
   const sub = effectiveUnitPrice(qty) * qty;
-  const fee = currentFee();
+  const wid = $("fWilaya").value;
+  const type = document.querySelector('input[name="dtype"]:checked').value;
+  const nominalFee = (wid && FEES[wid]) ? (type === "home" ? FEES[wid].home_fee : FEES[wid].desk_fee) : null;
+  const fee = currentFee(sub);
   animateNumber($("tProduct"), sub);
   if (fee === null) { $("tDelivery").textContent = "—"; delete $("tDelivery").dataset.val; }
   else animateNumber($("tDelivery"), fee);
   animateNumber($("tTotal"), fee === null ? sub : sub + fee);
+  renderFreeDeliveryHint(sub, fee, nominalFee || 0);
 }
 
 function clampQty() {

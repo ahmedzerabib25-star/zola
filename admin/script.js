@@ -84,6 +84,8 @@ const I18N = {
     col_served: "متوفر للتوصيل؟", restore_btn: "استعادة",
     confirm_delete_wilaya: "إزالة هذه الولاية من التوصيل؟ لن تظهر بعد الآن في نموذج الطلب للزبائن. يمكنك استعادتها لاحقًا في أي وقت.",
     wilaya_not_served_badge: "غير متوفرة — مخفية عن الزبائن",
+    free_delivery_title: "التوصيل المجاني", free_delivery_hint: "اختياري بالكامل — يتجاوز أسعار التوصيل لكل ولاية عند تفعيله.",
+    free_delivery_all_label: "توصيل مجاني على كل الطلبات", free_delivery_threshold_label: "توصيل مجاني للطلبات التي تتجاوز (دج) — ٠ لتعطيله",
   },
   fr: {
     pageTitle: "Zola — Tableau de bord",
@@ -152,6 +154,8 @@ const I18N = {
     col_served: "Livrée ?", restore_btn: "Restaurer",
     confirm_delete_wilaya: "Retirer cette wilaya de la livraison ? Elle n'apparaîtra plus dans le formulaire de commande. Vous pourrez la restaurer à tout moment.",
     wilaya_not_served_badge: "Non desservie — masquée aux clients",
+    free_delivery_title: "Livraison gratuite", free_delivery_hint: "Entièrement optionnel — prime sur les frais de livraison par wilaya une fois activé.",
+    free_delivery_all_label: "Livraison gratuite sur toutes les commandes", free_delivery_threshold_label: "Livraison gratuite au-delà de (DA) — 0 pour désactiver",
   },
   en: {
     pageTitle: "Zola — Admin dashboard",
@@ -220,10 +224,12 @@ const I18N = {
     col_served: "Delivered here?", restore_btn: "Restore",
     confirm_delete_wilaya: "Remove this wilaya from delivery? It will no longer appear on the customer order form. You can restore it anytime.",
     wilaya_not_served_badge: "Not served — hidden from customers",
+    free_delivery_title: "Free delivery", free_delivery_hint: "Fully optional — overrides the per-wilaya delivery fees once enabled.",
+    free_delivery_all_label: "Free delivery on all orders", free_delivery_threshold_label: "Free delivery on orders over (DZD) — 0 to disable",
   },
 };
 
-let LOCALE = localStorage.getItem("zola_admin_locale") || "fr";
+let LOCALE = localStorage.getItem("zola_admin_locale") || "ar";
 const t = (key) => I18N[LOCALE][key];
 
 function applyLocale() {
@@ -280,6 +286,7 @@ async function showApp() {
     loadProducts();
     loadContent();
     loadFees();
+    loadFreeDelivery();
     loadSettings();
     loadAdmins();
   }
@@ -742,6 +749,27 @@ function faqItem(row) {
   };
   return div;
 }
+
+/* ================= free delivery promo ================= */
+async function loadFreeDelivery() {
+  const { data: rows } = await db.from("settings").select("key, value")
+    .in("key", ["free_delivery_all", "free_delivery_threshold"]);
+  const map = {};
+  (rows || []).forEach((r) => (map[r.key] = r.value));
+  $("freeDeliveryAll").checked = !!(map.free_delivery_all && map.free_delivery_all.enabled);
+  $("freeDeliveryThreshold").value = (map.free_delivery_threshold && map.free_delivery_threshold.amount) || 0;
+}
+
+$("freeDeliverySave").addEventListener("click", async () => {
+  const status = $("freeDeliveryStatus");
+  status.textContent = t("saving"); status.className = "save-status";
+  const updates = [
+    { key: "free_delivery_all", value: { enabled: $("freeDeliveryAll").checked }, is_public: true },
+    { key: "free_delivery_threshold", value: { amount: Number($("freeDeliveryThreshold").value) || 0 }, is_public: true },
+  ];
+  const { error } = await db.from("settings").upsert(updates);
+  setStatus(status, error);
+});
 
 /* ================= delivery fees ================= */
 async function loadFees() {

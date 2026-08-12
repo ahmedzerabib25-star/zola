@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +13,24 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+<div id="splash" aria-hidden="true">
+  <div class="splash-panel splash-panel-l"></div>
+  <div class="splash-panel splash-panel-r"></div>
+  <div class="splash-particles" id="splashParticles"></div>
+  <div class="splash-content">
+    <div class="splash-glow"></div>
+    <div class="splash-ring splash-ring-1"></div>
+    <div class="splash-ring splash-ring-2"></div>
+    <img id="splashLogo" src="images/logo.png" alt="">
+    <span class="splash-line"></span>
+    <span class="splash-word" dir="ltr">
+      <span style="--i:0">Z</span><span style="--i:1">O</span><span style="--i:2">L</span><span style="--i:3">A</span>
+    </span>
+    <span class="splash-sub" id="splashSub"></span>
+  </div>
+</div>
+<script>document.body.classList.add('splash-lock');</script>
 
 <div class="scroll-progress" id="scrollProgress" aria-hidden="true"><span id="scrollProgressBar"></span></div>
 
@@ -284,6 +302,8 @@
           <label for="fAddress" data-i18n="ui_address"></label>
           <input id="fAddress" type="text" autocomplete="street-address">
         </div>
+
+        <div class="free-delivery-hint" id="freeDeliveryHint" hidden></div>
 
         <div class="totals" id="totalsBox">
           <div class="t-row" id="tFreeRow" hidden><span id="tFreeLabel"></span><b id="tFreeVal"></b></div>
