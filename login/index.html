@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">Zola — Connexion</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="../images/favicon.ico">
+<link rel="apple-touch-icon" href="../images/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Jost:wght@400;500;600&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="login-wrap">
+  <form id="loginForm" class="login-card">
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button type="button" data-lang="ar" class="lang-btn">عربي</button>
+      <button type="button" data-lang="fr" class="lang-btn">FR</button>
+      <button type="button" data-lang="en" class="lang-btn">EN</button>
+    </div>
+    <img src="../images/logo.png" alt="Zola" class="login-logo">
+    <h1 data-i18n="title"></h1>
+    <div class="field">
+      <label for="loginEmail" data-i18n="email"></label>
+      <input id="loginEmail" type="email" autocomplete="username" required dir="ltr">
+    </div>
+    <div class="field">
+      <label for="loginPass" data-i18n="password"></label>
+      <input id="loginPass" type="password" autocomplete="current-password" required dir="ltr">
+    </div>
+    <div class="form-error" id="loginError" hidden></div>
+    <button type="submit" class="btn-gold btn-block" id="loginBtn"><span data-i18n="submit"></span></button>
+    <p class="login-note" data-i18n="note"></p>
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

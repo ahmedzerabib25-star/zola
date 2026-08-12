@@ -1,0 +1,9 @@
+Cinematic close-up of golden frankincense resin tears (Boswellia sacra) smoldering on glowing charcoal in near-darkness. Thin wisps of fragrant white smoke curl slowly upward, catching warm amber light against a deep black background. Camera drifts in a slow, subtle push-in, shallow depth of field, fine dust and smoke particles floating through a soft directional light beam. Mood: sacred, luxurious, ancient heritage craft. Color grade: low-key, black and gold tones, warm amber highlights, moody and rich contrast. No text, no logos, no people, no hands, no visible props besides the resin and charcoal. Smooth, continuous, gently looping motion — no hard cuts. Ultra-realistic, 4K cinematic quality, 16:9.
+
+Settings to use when generating:
+- Aspect ratio: 16:9 (landscape) — the hero video is displayed with object-fit: cover, so it crops gracefully on both desktop and mobile, but 16:9 gives the cleanest crop.
+- No audio needed — the video autoplays muted on the site regardless.
+- Keep it dark/moody overall — a semi-transparent black gradient is already layered on top of the video for text readability, so darker, lower-contrast footage blends best with the black + gold brand.
+
+Alternate variant (Dhofar mountains / frankincense tree, for A/B testing):
+Cinematic wide shot of ancient frankincense trees (Boswellia sacra) growing on the rocky, sun-baked hills of Dhofar, southern Oman, at golden hour. Warm low sunlight rakes across the rugged terrain, casting long shadows across gnarled tree trunks with dried resin tears visible on the bark. Camera slowly pans and drifts across the landscape, dust drifting gently in the light. Mood: timeless, remote, sacred harvesting tradition. Color grade: warm gold and deep amber tones fading into shadow, cinematic low-key contrast. No text, no logos, no visible people. Smooth, continuous, gently looping motion — no hard cuts. Ultra-realistic, 4K cinematic quality, 16:9.

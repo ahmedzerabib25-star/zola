@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">Zola — Tableau de bord</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="../images/favicon.ico">
+<link rel="apple-touch-icon" href="../images/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Jost:wght@400;500;600&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== Dashboard ===== -->
+<div id="appView" hidden>
+  <header class="topbar">
+    <div class="brand">
+      <img src="../images/logo.png" alt="Zola">
+      <span class="brand-word small">ZOLA</span>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button data-tab="orders" class="tab active" data-i18n="tab_orders"></button>
+      <button data-tab="stock" class="tab" data-i18n="tab_stock"></button>
+      <button data-tab="content" class="tab" data-i18n="tab_content"></button>
+      <button data-tab="delivery" class="tab" data-i18n="tab_delivery"></button>
+      <button data-tab="settings" class="tab" data-i18n="tab_settings"></button>
+      <button data-tab="account" class="tab" data-i18n="tab_account"></button>
+    </nav>
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button type="button" data-lang="ar" class="lang-btn">عربي</button>
+      <button type="button" data-lang="fr" class="lang-btn">FR</button>
+      <button type="button" data-lang="en" class="lang-btn">EN</button>
+    </div>
+    <button id="logoutBtn" class="btn-ghost" data-i18n="logout"></button>
+  </header>
+
+  <main class="panel-wrap">
+
+    <!-- Orders -->
+    <section id="tab-orders" class="panel">
+      <div class="toolbar">
+        <select id="orderStatusFilter">
+          <option value="" data-i18n="status_all"></option>
+          <option value="pending" data-i18n="status_pending"></option>
+          <option value="confirmed" data-i18n="status_confirmed"></option>
+          <option value="shipped" data-i18n="status_shipped"></option>
+          <option value="delivered" data-i18n="status_delivered"></option>
+          <option value="cancelled" data-i18n="status_cancelled"></option>
+        </select>
+        <input id="orderSearch" type="search" data-i18n-ph="order_search_ph">
+        <button id="ordersRefresh" class="btn-ghost"><span data-i18n="refresh"></span> ⟳</button>
+      </div>
+      <div class="table-scroll">
+        <table id="ordersTable">
+          <thead>
+            <tr>
+              <th>#</th><th data-i18n="col_name"></th><th data-i18n="col_phone"></th><th data-i18n="col_location"></th>
+              <th data-i18n="col_qty"></th><th data-i18n="col_total"></th><th data-i18n="col_delivery"></th><th data-i18n="col_status"></th><th data-i18n="col_date"></th><th data-i18n="col_actions"></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="empty" id="ordersEmpty" hidden data-i18n="no_orders"></div>
+    </section>
+
+    <!-- Stock -->
+    <section id="tab-stock" class="panel" hidden>
+      <div id="productsList"></div>
+    </section>
+
+    <!-- Content -->
+    <section id="tab-content" class="panel" hidden>
+      <p class="hint" data-i18n="content_hint"></p>
+      <div id="contentList"></div>
+    </section>
+
+    <!-- Delivery -->
+    <section id="tab-delivery" class="panel" hidden>
+      <p class="hint" data-i18n="delivery_hint"></p>
+      <div class="toolbar">
+        <button id="feesSaveAll" class="btn-gold" data-i18n="save_all"></button>
+        <span id="feesStatus" class="save-status"></span>
+      </div>
+      <div class="table-scroll">
+        <table id="feesTable">
+          <thead><tr><th>#</th><th data-i18n="col_wilaya"></th><th data-i18n="col_home_fee"></th><th data-i18n="col_desk_fee"></th><th data-i18n="col_desk_avail"></th><th data-i18n="col_served"></th><th data-i18n="col_actions"></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="tab-settings" class="panel" hidden>
+      <div class="card">
+        <h3>Facebook Pixel</h3>
+        <div class="field"><label>Pixel ID</label><input id="setPixel" dir="ltr" placeholder="1234567890"></div>
+      </div>
+      <div class="card">
+        <h3 data-i18n="fraud_title"></h3>
+        <div class="field"><label data-i18n="dedup_label"></label><input id="setDedup" type="number" min="0" dir="ltr"></div>
+        <div class="field"><label data-i18n="rate_label"></label><input id="setRate" type="number" min="1" dir="ltr"></div>
+      </div>
+      <div class="card">
+        <h3 data-i18n="store_info_title"></h3>
+        <div class="field"><label data-i18n="store_phone_label"></label><input id="setPhone" dir="ltr"></div>
+      </div>
+      <button id="settingsSave" class="btn-gold" data-i18n="save_settings"></button>
+      <span id="settingsStatus" class="save-status"></span>
+
+      <div class="card telegram-card">
+        <h3>Telegram</h3>
+        <p class="hint" data-i18n="telegram_hint"></p>
+        <button id="tgTest" class="btn-ghost"><span data-i18n="telegram_test"></span> 📨</button>
+        <span id="tgStatus" class="save-status"></span>
+      </div>
+    </section>
+
+    <!-- Account -->
+    <section id="tab-account" class="panel" hidden>
+      <p class="hint" data-i18n="multi_session_hint"></p>
+
+      <div class="card">
+        <h3 data-i18n="change_password_title"></h3>
+        <div class="card-grid cols-3">
+          <div class="field"><label data-i18n="current_password_label"></label><input id="pwCurrent" type="password" dir="ltr" autocomplete="current-password"></div>
+          <div class="field"><label data-i18n="new_password_label"></label><input id="pwNew" type="password" dir="ltr" autocomplete="new-password"></div>
+          <div class="field"><label data-i18n="confirm_password_label"></label><input id="pwConfirm" type="password" dir="ltr" autocomplete="new-password"></div>
+        </div>
+        <button id="pwSave" class="btn-gold btn-sm" data-i18n="save"></button>
+        <span id="pwStatus" class="save-status"></span>
+      </div>
+
+      <div class="card">
+        <h3 data-i18n="add_admin_title"></h3>
+        <p class="hint" data-i18n="add_admin_hint"></p>
+        <div class="card-grid cols-3">
+          <div class="field"><label data-i18n="new_admin_email_label"></label><input id="newAdminEmail" type="email" dir="ltr" autocomplete="off"></div>
+          <div class="field"><label data-i18n="new_password_label"></label><input id="newAdminPass" type="password" dir="ltr" autocomplete="new-password"></div>
+          <div class="field"><label data-i18n="confirm_password_label"></label><input id="newAdminPassConfirm" type="password" dir="ltr" autocomplete="new-password"></div>
+        </div>
+        <button id="addAdminBtn" class="btn-gold btn-sm" data-i18n="add_admin_btn"></button>
+        <span id="addAdminStatus" class="save-status"></span>
+      </div>
+
+      <div class="card">
+        <h3 data-i18n="manage_admins_title"></h3>
+        <div class="table-scroll">
+          <table id="adminsTable">
+            <thead><tr><th data-i18n="col_email"></th><th data-i18n="col_created"></th><th data-i18n="col_last_login"></th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://upload-widget.cloudinary.com/global/all.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
