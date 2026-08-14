@@ -217,20 +217,58 @@ function applyLocale() {
 }
 
 // ---------- data loading ----------
-async function loadAll() {
-  const [contentQ, productQ, wilayasQ, feesQ, settingsQ] = await Promise.all([
-    db.from("content").select("key,value"),
-    db.from("products").select("*").eq("active", true).order("sort_order").limit(1),
-    db.from("wilayas").select("*").order("wilaya_id"),
-    db.from("delivery_fees").select("*"),
-    db.from("settings").select("key,value"),
-  ]);
+// Egress optimization: the storefront bundle (content/product/wilayas/fees/
+// settings) rarely changes — it's only touched via the admin panel. Caching
+// it in localStorage for a few minutes means reloads/repeat visits within
+// that window cost zero Supabase egress instead of re-downloading everything.
+const BUNDLE_CACHE_KEY = "zola_bundle_v1";
+const BUNDLE_CACHE_TTL = 10 * 60 * 1000; // 10 min
 
-  (contentQ.data || []).forEach((r) => (CONTENT[r.key] = r.value));
-  PRODUCT = (productQ.data || [])[0] || null;
-  WILAYAS = wilayasQ.data || [];
-  (feesQ.data || []).forEach((r) => (FEES[r.wilaya_id] = r));
-  (settingsQ.data || []).forEach((r) => (SETTINGS[r.key] = r.value));
+function readBundleCache() {
+  try {
+    const raw = localStorage.getItem(BUNDLE_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || Date.now() - parsed.t > BUNDLE_CACHE_TTL) return null;
+    return parsed.d;
+  } catch { return null; }
+}
+
+function writeBundleCache(data) {
+  try { localStorage.setItem(BUNDLE_CACHE_KEY, JSON.stringify({ t: Date.now(), d: data })); } catch {}
+}
+
+async function loadAll() {
+  const cached = readBundleCache();
+  let bundle;
+
+  if (cached) {
+    bundle = cached;
+  } else {
+    const [contentQ, productQ, wilayasQ, feesQ, settingsQ] = await Promise.all([
+      db.from("content").select("key,value"),
+      db.from("products")
+        .select("id,name,description,price,discount_percent,qty_tiers,bogo_buy_qty,bogo_free_qty,stock,images")
+        .eq("active", true).order("sort_order").limit(1),
+      db.from("wilayas").select("wilaya_id,wilaya_name_arabic,wilaya_name_latin").order("wilaya_id"),
+      db.from("delivery_fees").select("wilaya_id,home_fee,desk_fee,served"),
+      db.from("settings").select("key,value"),
+    ]);
+    bundle = {
+      content: contentQ.data || [],
+      product: (productQ.data || [])[0] || null,
+      wilayas: wilayasQ.data || [],
+      fees: feesQ.data || [],
+      settings: settingsQ.data || [],
+    };
+    writeBundleCache(bundle);
+  }
+
+  bundle.content.forEach((r) => (CONTENT[r.key] = r.value));
+  PRODUCT = bundle.product;
+  WILAYAS = bundle.wilayas;
+  bundle.fees.forEach((r) => (FEES[r.wilaya_id] = r));
+  bundle.settings.forEach((r) => (SETTINGS[r.key] = r.value));
 
   applyImages();
   applyVideo();
@@ -468,7 +506,7 @@ function renderWilayas() {
 
 async function loadCommunes(wilayaId) {
   if (!COMMUNES_CACHE[wilayaId]) {
-    const { data } = await db.from("communes").select("*")
+    const { data } = await db.from("communes").select("commune_id,commune_name_arabic,commune_name_latin")
       .eq("wilaya_id", wilayaId).order("commune_name_latin");
     COMMUNES_CACHE[wilayaId] = data || [];
   }
